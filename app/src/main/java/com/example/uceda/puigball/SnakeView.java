@@ -4,7 +4,10 @@ package com.example.uceda.puigball;
  * Created by uceda on 25/02/2018.
  */
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
@@ -13,7 +16,6 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.media.AudioManager;
 import android.media.SoundPool;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -41,7 +43,7 @@ class SnakeView extends SurfaceView implements Runnable {
 
     // para seguir moviendo
     public enum Direction {UP, RIGHT, DOWN, LEFT}
-    private Direction direccion = Direction.RIGHT;// empieza moviendose hacia la derecha
+    private Direction direccion = Direction.LEFT;// empieza moviendose hacia la derecha
 
     // La resolución de la pantalla
     private int anchoPantalla;
@@ -115,6 +117,7 @@ class SnakeView extends SurfaceView implements Runnable {
 
     public void empiezaJuego() {
         // empieza con una cabeza en mitad de la pantalla
+        direccion = Direction.LEFT;
         snakeLength = 20;
         snakeXs[0] = NUM_BLOQUES_ANCHO / 2;
         snakeYs[0] = numBloquesAlto / 2;
@@ -186,11 +189,39 @@ class SnakeView extends SurfaceView implements Runnable {
         mueveSnake();
 
         if (estaMuerta()) {
-            //start again
+            //empieza de nuevo
             sonido.play(dead_sound, 1, 1, 0, 0, 1);
 
-            empiezaJuego();
+            alertOneButton();
         }
+    }
+
+    /*
+ * AlertDialog with one button.
+ */
+    public void alertOneButton() {
+
+        Activity activity = (Activity) contexto;
+
+        //Lanzar el dialogo en el Hilo principal | UI  = User Interface
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                new AlertDialog.Builder(contexto)
+                        .setTitle("Snake")
+                        .setMessage("Tu serpiente ha muerto. ¿Quieres revivirla?")
+                        .setIcon(R.drawable.snakeicon)
+                        .setPositiveButton("Resucita", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                                SnakeView.this.empiezaJuego();
+                                SnakeView.this.reanudacion();
+                            }
+                        }).show();
+                SnakeView.this.pausa();
+            }
+        });
+
+
     }
 
     public void dibujaJuego() {
@@ -198,13 +229,18 @@ class SnakeView extends SurfaceView implements Runnable {
         if (holder.getSurface().isValid()) {
             canvas = holder.lockCanvas();
             canvas.drawColor(Color.argb(255, 120, 197, 87)); //el cesped
-            pinta.setColor(Color.argb(255, 255, 255, 255));//los bichos
-            pinta.setTextSize(30);
+            pinta.setColor(Color.argb(255, 255, 255, 255));//la serpiente
+            pinta.setTextSize(60);
             canvas.drawText("Puntuación:" + puntuacion, 10, 30, pinta);
 
 
             //dibuja la serpiente
             for (int i = 0; i < snakeLength; i++) {
+                if(i==0){
+                    pinta.setColor(Color.BLACK); //la cabeza ...
+                }else{
+                    pinta.setColor(Color.argb(255, 255, 255, 255));//la serpiente
+                }
                 canvas.drawRect(snakeXs[i] * snakeSize,
                         (snakeYs[i] * snakeSize),
                         (snakeXs[i] * snakeSize) + snakeSize,
@@ -258,8 +294,12 @@ class SnakeView extends SurfaceView implements Runnable {
         hilo.start();
     }
 
+    public void setDireccion(Direction direccion) {
+        this.direccion = direccion;
+    }
+
     //se encarga de los toques en pantalla
-    @Override
+ /*   @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
 
         switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
@@ -297,5 +337,5 @@ class SnakeView extends SurfaceView implements Runnable {
                 }
         }
         return true;
-    }
+    }*/
 }
