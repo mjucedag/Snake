@@ -58,29 +58,23 @@ public class SnakeActivity extends Activity implements SimpleGestureFilter.Simpl
     }
     @Override
     public void onSwipe(int direction) {
-        String str = "";
 
         switch (direction) {
 
             case SimpleGestureFilter.SWIPE_RIGHT :
-                str = "Swipe Right";
                 snakeView.setDireccion(SnakeView.Direction.RIGHT);
                 break;
             case SimpleGestureFilter.SWIPE_LEFT :
-                str = "Swipe Left";
                 snakeView.setDireccion(SnakeView.Direction.LEFT);
                 break;
             case SimpleGestureFilter.SWIPE_DOWN :
-                str = "Swipe Down";
                 snakeView.setDireccion(SnakeView.Direction.DOWN);
                 break;
             case SimpleGestureFilter.SWIPE_UP :
-                str = "Swipe Up";
                 snakeView.setDireccion(SnakeView.Direction.UP);
                 break;
 
         }
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
     }
 
     @Override
